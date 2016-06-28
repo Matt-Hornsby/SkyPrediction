@@ -21,7 +21,8 @@ defmodule Cskparser do
 
   def create_kv_from(match, keyname) do
     [ _, _, _, val ] = match
-    Keyword.put([], keyname, val)
+    %{:header => Map.put(%{}, keyname, val)}
+    #Keyword.put([], keyname, val)
   end
 
   def parse(line) do
@@ -34,22 +35,49 @@ defmodule Cskparser do
       match = match_data_line(line) ->
         # Found a data line
         [ _, datetime, clouds, transparency, seeing, wind, humidity, temperature] = match
-        %{data: %{:datetime=>datetime, :clouds=>clouds, :transparency=>transparency, :seeing=>seeing, :wind=>wind, :humidity=>humidity, :temperature=>temperature}]}
+        [data:
+              %{
+                :datetime=>datetime,
+                :clouds=>clouds,
+                :transparency=>transparency,
+                :seeing=>seeing,
+                :wind=>wind,
+                :humidity=>humidity,
+                :temperature=>temperature
+              }
+        ]
       true -> nil
     end
   end
 
   def base_map do
     %{
-      header: %{:title => "Unknown", :version => "Unknown", :utc_offset => 0}
+      header: %{:title => "Unknown", :version => "Unknown", :utc_offset => 0},
         data: %{}
       }
-    }
   end
 
+  #TODO: Perhaps have some recursive functions to loop through and accumulate an list of just data points
+  def test([[header: %{:city => city_name}]|tail]) do
+    IO.puts "city: #{city_name}"
+    test(tail)
+  end
+
+  def test([[header: head]|tail]) do
+    IO.inspect head
+    test(tail)
+  end
+
+  def test([[data: head]|tail]) do
+    IO.puts "somevalue: #{head[:somevalue]}"
+    #IO.inspect head
+    test(tail)
+  end
+
+  def test(input), do: input
 
 end
 
-
-
+testdata = [[header: %{:city => "Seattle"}], [header: %{:utc => -7}], [data: %{:somevalue => 123}], [data: %{:somevalue => 456}]]
+Cskparser.test(testdata)
 # File.stream!("seattlecsp.txt") |> Cskparser.categorize  |> IO.inspect(width: 150)
