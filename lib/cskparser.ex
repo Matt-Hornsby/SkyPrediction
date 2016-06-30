@@ -21,8 +21,7 @@ defmodule Cskparser do
 
   def create_kv_from(match, keyname) do
     [ _, _, _, val ] = match
-    %{:header => Map.put(%{}, keyname, val)}
-    #Keyword.put([], keyname, val)
+    [header: Map.put(%{}, keyname, val)]
   end
 
   def parse(line) do
@@ -50,34 +49,25 @@ defmodule Cskparser do
     end
   end
 
-  def base_map do
-    %{
-      header: %{:title => "Unknown", :version => "Unknown", :utc_offset => 0},
-        data: %{}
-      }
-  end
-
   #TODO: Perhaps have some recursive functions to loop through and accumulate an list of just data points
-  def test([[header: %{:city => city_name}]|tail]) do
-    IO.puts "city: #{city_name}"
-    test(tail)
+  def parse_line([[header: %{:title => title}]|tail]) do
+    IO.puts "title: #{title}"
+    parse_line(tail)
   end
 
-  def test([[header: head]|tail]) do
+  def parse_line([[header: head]|tail]) do
     IO.inspect head
-    test(tail)
+    parse_line(tail)
   end
 
-  def test([[data: head]|tail]) do
-    IO.puts "somevalue: #{head[:somevalue]}"
-    #IO.inspect head
-    test(tail)
+  def parse_line([[data: head]|tail]) do
+    IO.inspect(head, width: 150)
+    parse_line(tail)
   end
 
-  def test(input), do: input
+  def parse_line([nil | tail]), do: parse_line(tail)  # handle empty entries
+  def parse_line(input), do: input                    # handle all other patterns
 
 end
 
-testdata = [[header: %{:city => "Seattle"}], [header: %{:utc => -7}], [data: %{:somevalue => 123}], [data: %{:somevalue => 456}]]
-Cskparser.test(testdata)
-# File.stream!("seattlecsp.txt") |> Cskparser.categorize  |> IO.inspect(width: 150)
+#File.stream!("seattlecsp.txt") |> Cskparser.categorize  |> Cskparser.parse_line
