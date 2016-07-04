@@ -2,9 +2,6 @@ defmodule Cskparser do
 
   def categorize(lines) do
     lines |> Enum.map(&parse/1)
-    # need to reduce here with an accumulator structure based on base_map
-    # then fill in the data strcuture
-    # Use pattern matching to find {:data = value}  or {:header = value}??
   end
 
   def match_data_line(line) do
@@ -36,38 +33,45 @@ defmodule Cskparser do
         [ _, datetime, clouds, transparency, seeing, wind, humidity, temperature] = match
         [data:
               %{
-                :datetime=>datetime,
-                :clouds=>clouds,
-                :transparency=>transparency,
-                :seeing=>seeing,
-                :wind=>wind,
-                :humidity=>humidity,
-                :temperature=>temperature
+                datetime: datetime,
+                clouds: clouds,
+                transparency: transparency,
+                seeing: seeing,
+                wind: wind,
+                humidity: humidity,
+                temperature: temperature
               }
         ]
       true -> nil
     end
   end
 
-  #TODO: Perhaps have some recursive functions to loop through and accumulate an list of just data points
-  def parse_line([[header: %{:title => title}]|tail]) do
-    IO.puts "title: #{title}"
-    parse_line(tail)
+  def parse_lines(map) do
+    parse_line(map, [])
   end
 
-  def parse_line([[header: head]|tail]) do
-    IO.inspect head
-    parse_line(tail)
-  end
+  #defp parse_line([[header: %{:title => title}]|tail], accum) do
+    #IO.puts "title: #{title}"
+    #parse_line(tail, accum)
+  #end
 
-  def parse_line([[data: head]|tail]) do
-    IO.inspect(head, width: 150)
-    parse_line(tail)
-  end
+  #defp parse_line([[header: head]|tail], accum) do
+  #  IO.inspect head
+  #  parse_line(tail, [head] ++ accum)
+  #end
 
-  def parse_line([nil | tail]), do: parse_line(tail)  # handle empty entries
-  def parse_line(input), do: input                    # handle all other patterns
+  defp parse_line([[data: head]|tail], accum), do: parse_line(tail, [head] ++ accum)
+  defp parse_line([nil | tail], accum), do: parse_line(tail, accum)   # handle empty entries
+  defp parse_line([], accum), do: accum                               # handle end of recursive loop
+
+  def clear_day?(data), do: String.to_integer(data.clouds) >= 7
+  def good_seeing?(data), do: String.to_integer(data.seeing) >= 4
 
 end
 
-#File.stream!("seattlecsp.txt") |> Cskparser.categorize  |> Cskparser.parse_line
+#File.stream!("seattlecsp.txt") |> Cskparser.categorize  |> Cskparser.parse_lines
+results =
+  File.stream!("seattlecsp.txt")
+  |> Cskparser.categorize
+  |> Cskparser.parse_lines()
+  |> Enum.filter(&(&1[:clouds] == "8"))
