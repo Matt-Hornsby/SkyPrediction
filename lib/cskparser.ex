@@ -68,6 +68,15 @@ defmodule Cskparser do
     end
   end
 
+  def combine(darkness, data), do: combine(darkness, data, [])
+
+  def combine([darkness_head | darkness_tail], [data_head | data_tail], accum) do
+    new = Map.put(data_head, :darkness, darkness_head)
+    combine(darkness_tail, data_tail, accum ++ [new])
+  end
+
+  def combine([], [], accum), do: accum
+
   def merge_darkness_and_data(darkness, data) do
     combined = darkness ++ data
     f = fn(key) -> {key, Map.take(combined, key)} end
@@ -100,18 +109,19 @@ defmodule Cskparser do
 
   def average_chunk(chunk), do: chunk |> Enum.map(&(Map.get(&1,:limiting_magnitude))) |> Cskparser.mean
 
-  def mean(list), do: Enum.sum(list) / length(list)
+  def mean(list), do: (Enum.sum(list) / length(list)) |> Float.round(3)
 
 end
 
-# File.stream!("seattlecsp.txt") |> Cskparser.categorize  |> Cskparser.parse_lines |> Enum.filter(&Cskparser.good_seeing?/1)
+# File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.parse_lines |> Enum.filter(&Cskparser.good_seeing?/1)
 # File.stream!("seattlecsp.txt") |> Cskparser.categorize|> Cskparser.data
 # File.stream!("seattlecsp.txt") |> Cskparser.categorize|> Cskparser.darkness
 # File.stream!("seattlecsp.txt") |> Cskparser.categorize|> Cskparser.headers
 
 # File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.darkness |> Enum.chunk(5) |> Enum.at(0) |> Enum.map(&(Map.get(&1,:limiting_magnitude))) |> Cskparser.mean
 # File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.darkness |> Enum.chunk(5) |> Enum.map(&Cskparser.average_chunk/1)
-  #File.stream!("seattlecsp.txt")
+
+#File.stream!("seattlecsp.txt")
   #|> Cskparser.categorize
   #|> Cskparser.parse_lines
   #|> Enum.filter(&Cskparser.clear_sky?/1)
