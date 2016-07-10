@@ -83,7 +83,7 @@ defmodule Cskparser do
   def darkness(map), do: filter_by_data_type(map, :darkness)
 
   defp filter_by_data_type(map, type) when is_atom(type) do
-    map |> Enum.filter(&(Keyword.has_key?(&1, type))) |> Enum.map(&(&1[type]))
+    map |> Enum.filter(&(Keyword.has_key?(&1, type))) |> Enum.map(&(Keyword.get(&1,type)))
   end
 
   defp parse_line([[header: _]|tail], accum), do: parse_line(tail, accum) # skip header entries
@@ -98,6 +98,10 @@ defmodule Cskparser do
 
   def good_chance_of_seeing?(row), do: clear_sky?(row) && good_seeing?(row) && dark?(row)
 
+  def average_chunk(chunk), do: chunk |> Enum.map(&(Map.get(&1,:limiting_magnitude))) |> Cskparser.mean
+
+  def mean(list), do: Enum.sum(list) / length(list)
+
 end
 
 # File.stream!("seattlecsp.txt") |> Cskparser.categorize  |> Cskparser.parse_lines |> Enum.filter(&Cskparser.good_seeing?/1)
@@ -105,6 +109,8 @@ end
 # File.stream!("seattlecsp.txt") |> Cskparser.categorize|> Cskparser.darkness
 # File.stream!("seattlecsp.txt") |> Cskparser.categorize|> Cskparser.headers
 
+# File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.darkness |> Enum.chunk(5) |> Enum.at(0) |> Enum.map(&(Map.get(&1,:limiting_magnitude))) |> Cskparser.mean
+# File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.darkness |> Enum.chunk(5) |> Enum.map(&Cskparser.average_chunk/1)
   #File.stream!("seattlecsp.txt")
   #|> Cskparser.categorize
   #|> Cskparser.parse_lines
