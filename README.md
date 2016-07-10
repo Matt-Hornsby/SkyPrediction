@@ -1,20 +1,7 @@
-# Cskparser
+# SkyPrediction
 
-**TODO: Add description**
+Get alerted when something interesting is going to be visible in the night sky in your area, taking into account weather predictions, light pollution, and more.
 
-## Installation
+### About this app
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
-
-  1. Add cskparser to your list of dependencies in `mix.exs`:
-
-        def deps do
-          [{:cskparser, "~> 0.0.1"}]
-        end
-
-  2. Ensure cskparser is started before your application:
-
-        def application do
-          [applications: [:cskparser]]
-        end
-
+This app is being developed to help me learn the excellent Elixir programming language, and hopefully to provide a useful service to amateur stargazers. This app utilizes data from ClearDarkSky (http://cleardarksky.com) to determine if there will be clouds or other obstacles to viewing ISS flyovers, Iridium flares, and whatever else I can think of.
