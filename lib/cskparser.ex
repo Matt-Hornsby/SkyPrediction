@@ -1,10 +1,29 @@
 defmodule Cskparser do
 
+  @moduledoc """
+  This module parses a file stream from http://www.ClearDarkSky.com.
+  You'll need to find the right text file for your given observation area.
+
+  The path follows the following pattern:
+  http://www.cleardarksky.com/txtc/LOCATIONcsp.txt
+
+  For example, you can find the latest predictions for the seattle area here:
+  http://www.cleardarksky.com/txtc/Seattlecsp.txt
+  """
+
+  @doc """
+  Parses the given input stream into an enumerable data structure
+
+  ## Examples
+
+      iex> File.stream!("seattlecsp.txt") |> Cskparser.parse_file
+
+  """
   def parse_file(input_stream) do
     parsed_results = input_stream |> categorize_each_line
     hourly_darkness_averages = parsed_results |> extract_darkness_data |> collapse_magnitudes_into_hourly_chunks
     hourly_data = parsed_results |> extract_hourly_data
-    combine(hourly_darkness_averages, hourly_data)
+    combine(hourly_darkness_averages, hourly_data) |> Enum.map(&convert_to_hourly_prediction/1)
   end
 
   defp categorize_each_line(lines) do
@@ -59,11 +78,7 @@ defmodule Cskparser do
   defp extract_hourly_data(map), do: extract(map, :data)
   defp extract_darkness_data(map), do: extract(map, :darkness)
 
-  defp extract(map, type) do
-    map
-      |> Enum.filter(&(Keyword.has_key?(&1, type)))
-      |> Enum.map(&(Keyword.get(&1, type)))
-  end
+  defp extract(map, type), do: for [{^type, data}] <- map, do: data
 
   defp match_data_line(line) do
     Regex.run(~r/"(.*)",\s(\d*),\t(\d*),\t(\d*),\t(\d*),\t(\d*),\t(\d*),\t/, line)
@@ -98,21 +113,18 @@ defmodule Cskparser do
   defp average_chunk(chunk), do: chunk |> Enum.map(&(&1.limiting_magnitude)) |> mean
   defp mean(list), do: (Enum.sum(list) / length(list)) |> Float.round(3)
 
+  defp convert_to_hourly_prediction(map) do
+    %HourlyPrediction{
+                      hour: map.datetime,
+                      clouds: map.clouds,
+                      humidity: map.humidity,
+                      limiting_magnitude: map.limiting_magnitude,
+                      seeing: map.seeing,
+                      transparency: map.transparency,
+                      wind: map.wind,
+                      temperature: map.temperature
+                    }
+  end
+
+
 end
-
-# File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.parse_lines |> Enum.filter(&Cskparser.good_seeing?/1)
-# File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.data
-# File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.darkness
-# File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.headers
-
-# File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.darkness |> Enum.chunk(5) |> Enum.at(0) |> Enum.map(&(Map.get(&1,:limiting_magnitude))) |> Cskparser.mean
-# File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.darkness |> Enum.chunk(5) |> Enum.map(&Cskparser.average_chunk/1)
-
-# darkness_averages = File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.darkness |> Enum.chunk(5) |> Enum.map(&Cskparser.average_chunk/1)
-# data = File.stream!("seattlecsp.txt") |> Cskparser.categorize |> Cskparser.data
-# final_combined_data = Cskparser.combine(darkness_averages,data)
-
-#File.stream!("seattlecsp.txt")
-  #|> Cskparser.categorize
-  #|> Cskparser.parse_lines
-  #|> Enum.filter(&Cskparser.clear_sky?/1)
