@@ -7,11 +7,7 @@ Get alerted when something interesting is going to be visible in the night sky i
 
 > iex> WeatherPrediction.get_good_candidates
 
-> %{clouds: 7, datetime: "2016-06-25 13:00:00", humidity: 10, limiting_magnitude: -4.6, seeing: 4, temperature: 12, transparency: 0, wind: 5},
-
-> %{clouds: 8, datetime: "2016-06-25 15:00:00", humidity: 10, limiting_magnitude: -4.18, seeing: 4, temperature: 12, transparency: 0, wind: 4},
-
-> %{clouds: 10, datetime: "2016-06-26 05:00:00", humidity: 14, limiting_magnitude: 3.16, seeing: 4, temperature: 11, transparency: 3, wind: 4}
+![results](results.png)
 
 ### About this app
 
