@@ -5,7 +5,9 @@ Get alerted when something interesting is going to be visible in the night sky i
 ### Usage
 > iex -S mix
 
-> iex> WeatherPrediction.get_good_candidates
+> iex> SkyPrediction.get_data_for("Seattle")
+
+> iex> WeatherPrediction.get_good_candidates_for("Seattle")
 
 ![results](results.png)
 
