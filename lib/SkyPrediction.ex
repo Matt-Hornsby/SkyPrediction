@@ -1,6 +1,6 @@
 defmodule SkyPrediction do
   require Logger
-  
+
   def get_data_for(city_key) do
     Application.ensure_all_started :inets
     {:ok, resp} = :httpc.request(:get, {'http://www.cleardarksky.com/txtc/#{city_key}csp.txt', []}, [], [body_format: :binary])
