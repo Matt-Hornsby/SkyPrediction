@@ -21,10 +21,22 @@ defmodule WeatherPrediction do
       |> Enum.filter(&good_chance_of_seeing?/1)
   end
 
+  def get_seeing_for(city_key) do
+    get_file_stream_for(city_key)
+      |> Cskparser.parse_file
+      |> Enum.filter(&good_seeing?/1)
+  end
+
   def get_clear_skies_for(city_key) do
     get_file_stream_for(city_key)
       |> Cskparser.parse_file
       |> Enum.filter(&clear_sky?/1)
+  end
+
+  def get_transparency_for(city_key) do
+    get_file_stream_for(city_key)
+    |> Cskparser.parse_file
+    |> Enum.filter(&transparent?/1)
   end
 
   def get_dark_skies_for(city_key) do

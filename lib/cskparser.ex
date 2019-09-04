@@ -26,7 +26,7 @@ defmodule Cskparser do
     combine(hourly_darkness_averages, hourly_data) |> Enum.map(&convert_to_hourly_prediction/1)
   end
 
-  defp categorize_each_line(lines) do
+  def categorize_each_line(lines) do
     lines
       |> Enum.map(&parse/1)
       |> Enum.filter(&(&1 != nil))
@@ -107,6 +107,7 @@ defmodule Cskparser do
     new = Map.put(data_head, :limiting_magnitude, darkness_head)
     combine(darkness_tail, data_tail, accum ++ [new])
   end
+  defp combine(_, _, accum), do: accum # This is necessary if the lists are unbalanced
 
   defp collapse_magnitudes_into_hourly_chunks(darkness_data),
     do: darkness_data |> Enum.chunk(5) |> Enum.map(&average_chunk/1)
